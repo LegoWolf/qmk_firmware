@@ -19,14 +19,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include QMK_KEYBOARD_H
 #include <stdio.h>
 
-#define LAYER_BASE_MAC 0
-#define LAYER_BASE_WIN 1
-#define LAYER_SUPER_MAC 2
-#define LAYER_SUPER_WIN 3
-#define LAYER_FUNCTION 4
-#define LAYER_NAVIGATION 5
-#define LAYER_NUMBER_MAC 6
-#define LAYER_NUMBER_WIN 7
+enum custom_layers {
+    LAYER_BASE_MAC,
+    LAYER_BASE_WIN,
+    LAYER_SUPER_MAC,
+    LAYER_SUPER_WIN,
+    LAYER_FUNCTION,
+    LAYER_NAVIGATION,
+    LAYER_NUMBER_MAC,
+    LAYER_NUMBER_WIN
+};
+
+enum custom_keycodes {
+#ifdef VIA_ENABLE
+    KC_VBAR_MACRO = USER00,
+#else
+    KC_VBAR_MACRO = SAFE_RANGE,
+#endif
+    KC_MISSION_CONTROL,
+    KC_LAUNCHPAD
+};
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [LAYER_BASE_MAC] = LAYOUT_split_3x6_3(
@@ -138,11 +150,8 @@ oled_rotation_t oled_init_user(oled_rotation_t rotation) {
 
 void oled_render_os_mode(void) {
     oled_write_P(PSTR("   OS: "), false);
-    if (get_highest_layer(default_layer_state) == LAYER_BASE_WIN) {
-        oled_write_ln_P(PSTR("Windows"), false);
-    } else {
-        oled_write_ln_P(PSTR("Mac"), false);
-    }
+    uint8_t layer = get_highest_layer(default_layer_state);
+    oled_write_ln_P((layer == LAYER_BASE_WIN) ? PSTR("Windows") : PSTR("Mac"), false);
 }
 
 void oled_render_layer_state(void) {
@@ -175,7 +184,7 @@ void oled_render_leds(void) {
     oled_write_P((leds & (1 << USB_LED_CAPS_LOCK)) ? PSTR("L ") : PSTR("  "), false);
     oled_write_P((leds & (1 << USB_LED_NUM_LOCK)) ? PSTR("N ") : PSTR("  "), false);
     oled_write_P((leds & (1 << USB_LED_SCROLL_LOCK)) ? PSTR("S ") : PSTR("  "), false);
-    oled_write_ln_P(PSTR(""), false);
+    oled_advance_page(true);
 }
 
 void oled_render_mods(void) {
@@ -185,7 +194,7 @@ void oled_render_mods(void) {
     oled_write_P((mods & MOD_MASK_CTRL) ? PSTR("C ") : PSTR("  "), false);
     oled_write_P((mods & MOD_MASK_ALT) ? PSTR("A ") : PSTR("  "), false);
     oled_write_P((mods & MOD_MASK_SHIFT) ? PSTR("S ") : PSTR("  "), false);
-    oled_write_ln_P(PSTR(""), false);
+    oled_advance_page(true);
 }
 
 void render_bootmagic_status(bool status) {
@@ -222,5 +231,22 @@ bool oled_task_user(void) {
         oled_render_logo();
     }
     return false;
+}
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case KC_MISSION_CONTROL:
+            host_consumer_send(record->event.pressed ? 0x29F : 0);
+            return false; // Skip all further processing of this key
+        case KC_LAUNCHPAD:
+            host_consumer_send(record->event.pressed ? 0x2A0 : 0);
+            return false; // Skip all further processing of this key
+        case KC_VBAR_MACRO:
+            if (record->event.pressed) {
+                SEND_STRING(SS_LGUI(" ") SS_DELAY(100) "|" SS_LGUI(" "));
+            }
+            return false; // Skip all further processing of this key   
+    }
+    return true; // Process all other keycodes normally
 }
 #endif // OLED_ENABLE
