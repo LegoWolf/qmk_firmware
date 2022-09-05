@@ -19,10 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 enum custom_keycodes {
 #ifdef VIA_ENABLE
-    KC_MISSION_CONTROL = USER00,
+    KC_VBAR_MACRO = USER00,
 #else
-    KC_MISSION_CONTROL = SAFE_RANGE,
+    KC_VBAR_MACRO = SAFE_RANGE,
 #endif
+    KC_MISSION_CONTROL,
     KC_LAUNCHPAD
 };
 
@@ -71,6 +72,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false; // Skip all further processing of this key
         case KC_LAUNCHPAD:
             host_consumer_send(record->event.pressed ? 0x2A0 : 0);
+            return false; // Skip all further processing of this key
+        case KC_VBAR_MACRO:
+            if (record->event.pressed) {
+                SEND_STRING(SS_LGUI(" ") SS_DELAY(100) "|" SS_LGUI(" "));
+            }
             return false; // Skip all further processing of this key
        default:
             return true; // Process all other keycodes normally
