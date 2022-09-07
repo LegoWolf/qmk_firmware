@@ -19,77 +19,60 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include QMK_KEYBOARD_H
 #include <stdio.h>
 
-enum custom_layers {
-    LAYER_BASE_MAC,
-    LAYER_BASE_WIN,
-    LAYER_SUPER_MAC,
-    LAYER_SUPER_WIN,
-    LAYER_FUNCTION,
-    LAYER_NAVIGATION,
-    LAYER_NUMBER_MAC,
-    LAYER_NUMBER_WIN
-};
+typedef enum {
+    LAYER_BASE,
+    LAYER_SUPER,
+    LAYER_FUNC,
+    LAYER_NAV,
+    LAYER_NUM
+} custom_layers_t;
 
-enum custom_keycodes {
+typedef enum {
+    WIN,
+    MAC
+} os_modes_t;
+
+typedef enum {
 #ifdef VIA_ENABLE
-    KC_VBAR_MACRO = USER00,
+    KC_OSMODE = USER00,
 #else
-    KC_VBAR_MACRO = SAFE_RANGE,
+    KC_OSMODE = SAFE_RANGE,
 #endif
+    KC_VERTICAL_BAR,
     KC_MISSION_CONTROL,
     KC_LAUNCHPAD
-};
+} custom_keycodes_t;
+
+#define KC_VBAR KC_VERTICAL_BAR 
+#define KC_MSCT KC_MISSION_CONTROL 
+#define KC_LCPD KC_LAUNCHPAD
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-  [0] = LAYOUT_split_3x6_3(
+  [LAYER_BASE] = LAYOUT_split_3x6_3(
   //,----------------+------------+----------------+----------------+----------------+-----------------.  ,-----------------+------------------+------------------+----------------+-----------------+----------------.
       KC_ESCAPE,       KC_Q,        KC_W,            KC_E,            KC_R,            KC_T,                KC_Y,             KC_U,              KC_I,              KC_O,            KC_P,             KC_MINUS,
   //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
-      MO(2),           KC_A,        KC_S,            KC_D,            KC_F,            KC_G,                KC_H,             KC_J,              KC_K,              KC_L,            KC_SCOLON,        MO(2),
+      MO(LAYER_SUPER), KC_A,        KC_S,            KC_D,            KC_F,            KC_G,                KC_H,             KC_J,              KC_K,              KC_L,            KC_SCOLON,        MO(LAYER_SUPER),
   //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
       OSM(MOD_LSFT),   KC_Z,        KC_X,            KC_C,            KC_V,            KC_B,                KC_N,             KC_M,              KC_COMMA,          KC_DOT,          KC_SLASH,         OSM(MOD_RSFT),
   //`----------------+------------+----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------+-----------------+----------------,
-                                                     TT(5),           KC_BSPACE,       LGUI_T(KC_TAB),      KC_ENTER,         KC_SPACE,          KC_RALT
+                                                     TT(LAYER_NAV),   KC_BSPACE,       LCTL_T(KC_TAB),      KC_ENTER,         KC_SPACE,          KC_RALT
   //                                               `----------------+----------------+-----------------,  `-----------------+------------------+------------------,                                                    
   ),
 
-  [1] = LAYOUT_split_3x6_3(
+  [LAYER_SUPER] = LAYOUT_split_3x6_3(
   //,----------------+------------+----------------+----------------+----------------+-----------------.  ,-----------------+------------------+------------------+----------------+-----------------+----------------.
-      _______,         _______,     _______,         _______,         _______,         _______,             _______,          _______,           _______,           _______,         _______,          _______,
-  //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
-      MO(3),           _______,     _______,         _______,         _______,         _______,             _______,          _______,           _______,           _______,         _______,          MO(3),
-  //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
-      _______,         _______,     _______,         _______,         _______,         _______,             _______,          _______,           _______,           _______,         _______,          _______,
-  //`----------------+------------+----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------+-----------------+----------------,
-                                                     TT(5),           _______,         LCTL_T(KC_TAB),      _______,          _______,           _______
-  //                                               `----------------+----------------+-----------------,  `-----------------+------------------+------------------,                                                    
-  ),
-
-  [2] = LAYOUT_split_3x6_3(
-  //,----------------+------------+----------------+----------------+----------------+-----------------.  ,-----------------+------------------+------------------+----------------+-----------------+----------------.
-      _______,         KC_BSLASH,   XXXXXXX,         KC_QUOTE,        XXXXXXX,         KC_INSERT,           KC_DELETE,        KC_GRAVE,          KC_NONUS_BSLASH,   KC_LBRACKET,     RALT(KC_MINUS),   KC_EQUAL,
+      _______,         KC_BSLASH,   XXXXXXX,         KC_QUOTE,        XXXXXXX,         KC_INSERT,           KC_DELETE,        KC_NONUS_BSLASH,   KC_GRAVE,          KC_LBRACKET,     KC_VBAR,          KC_EQUAL,
   //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
       XXXXXXX,         KC_1,        KC_2,            KC_3,            KC_4,            KC_5,                KC_6,             KC_7,              KC_8,              KC_9,            KC_0,             XXXXXXX,
   //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
-      KC_CAPSLOCK,     XXXXXXX,     XXXXXXX,         KC_RBRACKET,     XXXXXXX,         XXXXXXX,             KC_APPLICATION,   OSM(MOD_LGUI),     OSM(MOD_LCTL),     OSM(MOD_LALT),   OSL(4),           _______,
+      KC_CAPSLOCK,     XXXXXXX,     XXXXXXX,         KC_RBRACKET,     XXXXXXX,         XXXXXXX,             KC_APPLICATION,   OSM(MOD_LGUI),     OSM(MOD_LCTL),     OSM(MOD_LALT),   OSL(LAYER_FUNC),  _______,
   //`----------------+------------+----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------+-----------------+----------------,
-                                                     TT(6),           _______,         _______,             DF(1),            _______,           _______
+                                                     TT(LAYER_NUM),   _______,         _______,             KC_OSMODE,        _______,           _______
   //                                               `----------------+----------------+-----------------,  `-----------------+------------------+------------------,                                                    
   ),
 
-  [3] = LAYOUT_split_3x6_3(
-  //,----------------+------------+----------------+----------------+----------------+-----------------.  ,-----------------+------------------+------------------+----------------+-----------------+----------------.
-      _______,         KC_BSLASH,   XXXXXXX,         KC_QUOTE,        XXXXXXX,         KC_INSERT,           KC_DELETE,        KC_NONUS_BSLASH,   KC_GRAVE,          KC_LBRACKET,     USER00,           KC_EQUAL,
-  //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
-      XXXXXXX,         KC_1,        KC_2,            KC_3,            KC_4,            KC_5,                KC_6,             KC_7,              KC_8,              KC_9,            KC_0,             XXXXXXX,
-  //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
-      KC_CAPSLOCK,     XXXXXXX,     XXXXXXX,         KC_RBRACKET,     XXXXXXX,         XXXXXXX,             KC_APPLICATION,   OSM(MOD_LGUI),     OSM(MOD_LCTL),     OSM(MOD_LALT),   OSL(4),           _______,
-  //`----------------+------------+----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------+-----------------+----------------,
-                                                     TT(7),           _______,         _______,             DF(0),            _______,           _______
-  //                                               `----------------+----------------+-----------------,  `-----------------+------------------+------------------,                                                    
-  ),
-
-  [4] = LAYOUT_split_3x6_3(
+  [LAYER_FUNC] = LAYOUT_split_3x6_3(
   //,----------------+------------+----------------+----------------+----------------+-----------------.  ,-----------------+------------------+------------------+----------------+-----------------+----------------.
       XXXXXXX,         KC_F11,      KC_F12,          KC_F13,          KC_F14,          KC_F15,              KC_F16,           KC_F17,            KC_F18,            KC_F19,          KC_F20,           XXXXXXX,
   //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
@@ -101,39 +84,27 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //                                               `----------------+----------------+-----------------,  `-----------------+------------------+------------------,                                                    
   ),
 
-  [5] = LAYOUT_split_3x6_3(
+  [LAYER_NAV] = LAYOUT_split_3x6_3(
   //,----------------+------------+----------------+----------------+----------------+-----------------.  ,-----------------+------------------+------------------+----------------+-----------------+----------------.
-      TT(5),           XXXXXXX,     KC_HOME,         KC_UP,           KC_END,          KC_PGUP,             KC_PGUP,          KC_HOME,           KC_UP,             KC_END,          XXXXXXX,          XXXXXXX,
+      TT(LAYER_NAV),   XXXXXXX,     KC_HOME,         KC_UP,           KC_END,          KC_PGUP,             KC_PGUP,          KC_HOME,           KC_UP,             KC_END,          XXXXXXX,          XXXXXXX,
   //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
       _______,         XXXXXXX,     KC_LEFT,         KC_DOWN,         KC_RIGHT,        KC_PGDOWN,           KC_PGDOWN,        KC_LEFT,           KC_DOWN,           KC_RIGHT,        XXXXXXX,          _______,
   //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
       _______,         XXXXXXX,     OSM(MOD_LGUI),   OSM(MOD_LCTL),   OSM(MOD_LALT),   XXXXXXX,             XXXXXXX,          OSM(MOD_LGUI),     OSM(MOD_LCTL),     OSM(MOD_LALT),   XXXXXXX,          _______,
   //`----------------+------------+----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------+-----------------+----------------,
-                                                     TT(5),           _______,         _______,             _______,          _______,           _______
+                                                     TT(LAYER_NAV),   _______,         _______,             _______,          _______,           _______
   //                                               `----------------+----------------+-----------------,  `-----------------+------------------+------------------,                                                    
   ),
 
-  [6] = LAYOUT_split_3x6_3(
+  [LAYER_NUM] = LAYOUT_split_3x6_3(
   //,----------------+------------+----------------+----------------+----------------+-----------------.  ,-----------------+------------------+------------------+----------------+-----------------+----------------.
-      TT(6),           XXXXXXX,     KC_BRID,         XXXXXXX,         KC_BRIU,         KC_VOLU,             KC_KP_SLASH,      KC_KP_7,           KC_KP_8,           KC_KP_9,         KC_KP_PLUS,       XXXXXXX,
+      TT(LAYER_NUM),   XXXXXXX,     KC_BRID,         XXXXXXX,         KC_BRIU,         KC_VOLU,             KC_KP_SLASH,      KC_KP_7,           KC_KP_8,           KC_KP_9,         KC_KP_PLUS,       XXXXXXX,
   //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
       XXXXXXX,         XXXXXXX,     KC_MPRV,         KC_MPLY,         KC_MNXT,         KC_VOLD,             KC_KP_0,          KC_KP_4,           KC_KP_5,           KC_KP_6,         KC_KP_MINUS,      XXXXXXX,
   //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
-      XXXXXXX,         XXXXXXX,     XXXXXXX,         USER01,          USER02,          KC_MUTE,             KC_KP_ASTERISK,   KC_KP_1,           KC_KP_2,           KC_KP_3,         KC_KP_COMMA,      XXXXXXX,
+      XXXXXXX,         XXXXXXX,     XXXXXXX,         KC_MSCT,         KC_LCPD,         KC_MUTE,             KC_KP_ASTERISK,   KC_KP_1,           KC_KP_2,           KC_KP_3,         KC_KP_COMMA,      XXXXXXX,
   //`----------------+------------+----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------+-----------------+----------------,
-                                                     TT(6),           _______,         XXXXXXX,             KC_KP_ENTER,      KC_KP_EQUAL,       KC_KP_DOT
-  //                                               `----------------+----------------+-----------------,  `-----------------+------------------+------------------,                                                    
-  ),
-
-  [7] = LAYOUT_split_3x6_3(
-  //,----------------+------------+----------------+----------------+----------------+-----------------.  ,-----------------+------------------+------------------+----------------+-----------------+----------------.
-      TT(7),           XXXXXXX,     KC_BRID,         XXXXXXX,         KC_BRIU,         KC_VOLU,             KC_KP_SLASH,      KC_KP_7,           KC_KP_8,           KC_KP_9,         KC_KP_PLUS,       XXXXXXX,
-  //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
-      XXXXXXX,         XXXXXXX,     KC_MPRV,         KC_MPLY,         KC_MNXT,         KC_VOLD,             KC_KP_0,          KC_KP_4,           KC_KP_5,           KC_KP_6,         KC_KP_MINUS,      XXXXXXX,
-  //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
-      XXXXXXX,         XXXXXXX,     XXXXXXX,         XXXXXXX,         XXXXXXX,         KC_MUTE,             KC_KP_ASTERISK,   KC_KP_1,           KC_KP_2,           KC_KP_3,         KC_KP_COMMA,      XXXXXXX,
-  //`----------------+------------+----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------+-----------------+----------------,
-                                                     TT(7),           _______,         XXXXXXX,             KC_KP_ENTER,      KC_KP_EQUAL,       KC_KP_DOT
+                                                     TT(LAYER_NUM),   _______,         XXXXXXX,             KC_KP_ENTER,      KC_KP_EQUAL,       KC_KP_DOT
   //                                               `----------------+----------------+-----------------,  `-----------------+------------------+------------------,                                                    
   )
 };
@@ -147,12 +118,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 static uint8_t current_leds, current_mods;
 static layer_state_t current_default_layer, current_layer;
+static os_modes_t current_os_mode;
 static bool force_render = true;
+static os_modes_t os_mode = WIN;
 
 #ifdef OLED_ENABLE
 
 static bool is_windows( void ) {
-  return (current_default_layer == LAYER_BASE_WIN);
+  return (current_os_mode == WIN);
 }
 
 static void oled_render_logo(void) {
@@ -168,7 +141,8 @@ static bool has_state_changed( void ) {
   return (current_default_layer != get_highest_layer(default_layer_state)) ||
     (current_layer != get_highest_layer(layer_state)) ||
     (current_leds != host_keyboard_leds()) ||
-    (current_mods != (get_mods() | get_oneshot_mods()));
+    (current_mods != (get_mods() | get_oneshot_mods())) ||
+    (current_os_mode != os_mode);
 }
 
 static void update_state( void ) {
@@ -176,6 +150,7 @@ static void update_state( void ) {
     current_layer = get_highest_layer(layer_state);
     current_leds = host_keyboard_leds();
     current_mods = get_mods() | get_oneshot_mods();
+    current_os_mode = os_mode;
     force_render = false;
 }
 
@@ -277,26 +252,23 @@ static void oled_gfx_render_layer_state(int x, int y) {
 
     oled_set_cursor(x, y);
     switch (current_layer) {
-        case LAYER_NUMBER_MAC:
-        case LAYER_NUMBER_WIN:
+        case LAYER_NUM:
             oled_write_raw_P(bitmap_number, sizeof(bitmap_number));
             break;
 
-        case LAYER_NAVIGATION:
+        case LAYER_NAV:
             oled_write_raw_P(bitmap_navigation, sizeof(bitmap_navigation));
             break;
 
-        case LAYER_SUPER_MAC:
-        case LAYER_SUPER_WIN:
+        case LAYER_SUPER:
             oled_write_raw_P(bitmap_super, sizeof(bitmap_super));
             break;
 
-        case LAYER_BASE_MAC:
-        case LAYER_BASE_WIN:
+        case LAYER_BASE:
             oled_write_raw_P(bitmap_base, sizeof(bitmap_base));
             break;
 
-        case LAYER_FUNCTION:
+        case LAYER_FUNC:
             oled_write_raw_P(bitmap_function, sizeof(bitmap_function));
             break;
     }
@@ -390,22 +362,19 @@ void oled_render_os_mode(void) {
 void oled_render_layer_state(void) {
     oled_write_P(PSTR("Layer: "), false);
     switch (current_layer) {
-        case LAYER_NUMBER_MAC:
-        case LAYER_NUMBER_WIN:
+        case LAYER_NUM:
             oled_write_ln_P(PSTR("Number"), false);
             break;
-        case LAYER_NAVIGATION:
+        case LAYER_NAV:
             oled_write_ln_P(PSTR("Navigation"), false);
             break;
-        case LAYER_FUNCTION:
+        case LAYER_FUNC:
             oled_write_ln_P(PSTR("Function"), false);
             break;
-        case LAYER_SUPER_MAC:
-        case LAYER_SUPER_WIN:
+        case LAYER_SUPER:
             oled_write_ln_P(PSTR("Super"), false);
             break;
-        case LAYER_BASE_MAC:
-        case LAYER_BASE_WIN:
+        case LAYER_BASE:
             oled_write_ln_P(PSTR("Base"), false);
             break;
     }
@@ -485,19 +454,82 @@ void keyboard_post_init_user( void ) {
 
 #endif // OLED_ENABLE
 
+void emit_key_event(uint16_t keycode, keyrecord_t *record)
+{
+    if (record->event.pressed) {
+        register_code16(keycode);
+    } else {
+        unregister_code16(keycode);
+    }  
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
-        case KC_MISSION_CONTROL:
-            host_consumer_send(record->event.pressed ? 0x29F : 0);
-            return false; // Skip all further processing of this key
-        case KC_LAUNCHPAD:
-            host_consumer_send(record->event.pressed ? 0x2A0 : 0);
-            return false; // Skip all further processing of this key
-        case KC_VBAR_MACRO:
+        case KC_OSMODE:
             if (record->event.pressed) {
-                SEND_STRING(SS_LGUI(" ") SS_DELAY(100) "|" SS_LGUI(" "));
+                // Switch OS mode.
+                os_mode = (os_mode == WIN) ? MAC : WIN;
             }
-            return false; // Skip all further processing of this key          
+            return false;
+
+        case KC_MISSION_CONTROL:
+            if (os_mode == MAC) {
+                // Send the mission control key command.
+                host_consumer_send(record->event.pressed ? 0x29F : 0);
+                return false;
+            }
+            break;
+
+        case KC_LAUNCHPAD:
+            if (os_mode == MAC) {
+                // Send the launch pad key command.
+                host_consumer_send(record->event.pressed ? 0x2A0 : 0);
+                return false;
+            }
+            break;
+
+        case KC_VERTICAL_BAR:
+              if (os_mode == MAC) {
+                  // On the Mac Canadian Multilanguage Standard layout, vertical bar is just RALT+MINUS.
+                  emit_key_event(RALT(KC_MINUS), record);
+              } else if (record->event.pressed) {
+                  // On the Windows Canadian Multilanguage Standard layout, vertical bar is unavailable.
+                  // So we swap to US layout, type the vertical bar and swap back.
+                  SEND_STRING(SS_LGUI(" ") SS_DELAY(100) "|" SS_LGUI(" "));
+              }
+            return false;
+
+        case KC_NONUS_BSLASH:
+            if (os_mode == MAC) {
+                // Mac and Windows swap the placement of NUBS and GRAVE under Canadian Multilanguage Standard.
+                emit_key_event(KC_GRAVE, record);
+                return false;
+            }
+            break;
+
+        case KC_GRAVE:
+            if (os_mode == MAC) {
+                // Mac and Windows swap the placement of NUBS and GRAVE under Canadian Multilanguage Standard.
+                emit_key_event(KC_NONUS_BSLASH, record);
+                return false;
+            }
+            break;
+
+        case KC_SCROLLLOCK:
+            if (os_mode == MAC) {
+                // Suppress scroll lock on Mac. It just gets confused.
+                return false;
+            }
+            break;
+
+        case LCTL_T(KC_TAB):
+            if (os_mode == MAC && !record->tap.count) {
+                // Change the LCTL_L(KC_TAB) key to LGUI_T(KC_TAB) on Mac.
+                emit_key_event(KC_LGUI, record);
+                return false;
+            }
+            break;
     }
+
     return true; // Process all other keycodes normally
 }
