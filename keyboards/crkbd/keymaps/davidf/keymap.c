@@ -46,6 +46,7 @@ typedef enum {
 #define KC_VBAR KC_VERTICAL_BAR 
 #define KC_MSCT KC_MISSION_CONTROL 
 #define KC_LCPD KC_LAUNCHPAD
+#define MAX_LAYERS (LAYER_NUM + 1)
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [LAYER_BASE] = LAYOUT_split_3x6_3(
@@ -109,23 +110,30 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   )
 };
 
-// All bitmaps were converted from PNG to CPP code below using: https://javl.github.io/image2cpp/
-
-#define GFX_FRAME_DURATION 200  // Don't redraw graphics more frquently than this number of ms.
-#define SMALL_ICON_DIM 16
-#define SMALL_ICON_SIZE 32
-#define SHOW_GRAPHICS
-
-static uint8_t current_leds, current_mods;
-static layer_state_t current_default_layer, current_layer;
-static os_modes_t current_os_mode;
-static bool force_render = true;
 static os_modes_t os_mode = WIN;
 
 #ifdef OLED_ENABLE
 
+// All bitmaps below were converted from PNG to CPP code below using: https://javl.github.io/image2cpp/
+
+#define SMALL_ICON_DIM 16
+#define SMALL_ICON_SIZE 32
+#define LARGE_ICON_SIZE 128
+#define SHOW_GRAPHICS
+
+typedef struct {
+    os_modes_t os_mode;
+    layer_state_t default_layer;
+    layer_state_t layer;
+    uint8_t leds;
+    uint8_t mods;
+} state_t;
+
+static state_t current;
+static bool force_render = true;
+
 static bool is_windows( void ) {
-  return (current_os_mode == WIN);
+    return (current.os_mode == WIN);
 }
 
 static void oled_render_logo(void) {
@@ -137,24 +145,63 @@ static void oled_render_logo(void) {
     oled_write_P(crkbd_logo, false);
 }
 
+static void get_state( state_t *state ) {
+    state->default_layer = get_highest_layer(default_layer_state);
+    state->layer = get_highest_layer(layer_state);
+    state->leds = host_keyboard_leds();
+    state->mods = get_mods() | get_oneshot_mods();
+    state->os_mode = os_mode;
+}
+
 static bool has_state_changed( void ) {
-  return (current_default_layer != get_highest_layer(default_layer_state)) ||
-    (current_layer != get_highest_layer(layer_state)) ||
-    (current_leds != host_keyboard_leds()) ||
-    (current_mods != (get_mods() | get_oneshot_mods())) ||
-    (current_os_mode != os_mode);
+  state_t state;
+  get_state( &state );
+  return (current.os_mode != state.os_mode) || (current.leds != state.leds) || (current.mods != state.mods) ||
+      (current.default_layer != state.default_layer ) || (current.layer != state.layer);     
 }
 
 static void update_state( void ) {
-    current_default_layer = get_highest_layer(default_layer_state);
-    current_layer = get_highest_layer(layer_state);
-    current_leds = host_keyboard_leds();
-    current_mods = get_mods() | get_oneshot_mods();
-    current_os_mode = os_mode;
+    get_state( &current );
     force_render = false;
 }
 
 #ifdef SHOW_GRAPHICS
+
+// This graphical implementation displays the keyboard state on the left side OLED display as a series of icons.
+
+static void oled_gfx_render_large_bitmap(int x, int y, const char *bitmap, bool enabled) {
+    // 'blank', 32x32px
+    static const char bitmap_blank [] PROGMEM = {
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    };
+
+    bitmap = enabled ? bitmap : bitmap_blank;
+    oled_set_cursor(x, y);
+    oled_write_raw_P(bitmap, LARGE_ICON_SIZE);
+}
+
+static void oled_gfx_render_small_bitmap(int x, int y, const char *bitmap, bool enabled) {
+    // 'blank', 16x16px
+    static const char bitmap_blank [] PROGMEM = {
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 
+    };
+
+    uint8_t i, n;
+    bitmap = enabled ? bitmap : bitmap_blank;
+
+    for(i = 0, n = 0; n < SMALL_ICON_SIZE; i++, n += SMALL_ICON_DIM) {
+        oled_set_cursor(x, y + i);
+        oled_write_raw_P(bitmap + n, SMALL_ICON_DIM);
+    }
+}
 
 static void oled_gfx_render_os_mode(int x, int y) {
     // 'apple logo', 32x32px
@@ -181,12 +228,8 @@ static void oled_gfx_render_os_mode(int x, int y) {
         0x00, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x3f, 0x00, 0x00
     };    
 
-    oled_set_cursor(x, y);
-    if (is_windows()) {
-        oled_write_raw_P(bitmap_windows, sizeof(bitmap_windows));
-    } else {
-        oled_write_raw_P(bitmap_apple, sizeof(bitmap_apple));
-    } 
+    const char *bitmap = is_windows() ? bitmap_windows : bitmap_apple;
+    oled_gfx_render_large_bitmap(x, y, bitmap, true);
 }
 
 static void oled_gfx_render_layer_state(int x, int y) {
@@ -250,44 +293,10 @@ static void oled_gfx_render_layer_state(int x, int y) {
         0x00, 0x00, 0x07, 0x0f, 0x0f, 0x0f, 0x0f, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
     };
 
-    oled_set_cursor(x, y);
-    switch (current_layer) {
-        case LAYER_NUM:
-            oled_write_raw_P(bitmap_number, sizeof(bitmap_number));
-            break;
-
-        case LAYER_NAV:
-            oled_write_raw_P(bitmap_navigation, sizeof(bitmap_navigation));
-            break;
-
-        case LAYER_SUPER:
-            oled_write_raw_P(bitmap_super, sizeof(bitmap_super));
-            break;
-
-        case LAYER_BASE:
-            oled_write_raw_P(bitmap_base, sizeof(bitmap_base));
-            break;
-
-        case LAYER_FUNC:
-            oled_write_raw_P(bitmap_function, sizeof(bitmap_function));
-            break;
-    }
-}
-
-static void oled_gfx_render_small_bitmap(int x, int y, const char *bitmap, bool enabled) {
-    // 'led-caps-lock', 16x16px
-    static const char bitmap_blank [] PROGMEM = {
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 
-    };
-
-    uint8_t i, n;
-    bitmap = enabled ? bitmap : bitmap_blank;
-
-    for(i = 0, n = 0; n < SMALL_ICON_SIZE; i++, n += SMALL_ICON_DIM) {
-        oled_set_cursor(x, y + i);
-        oled_write_raw_P(bitmap + n, SMALL_ICON_DIM);
-    }
+    static const char* bitmaps[] = {bitmap_base, bitmap_super, bitmap_function, bitmap_navigation, bitmap_number};
+    bool valid = (0 <= current.layer && current.layer < MAX_LAYERS);
+    const char *bitmap = valid ? bitmaps[current.layer] : NULL;
+    oled_gfx_render_large_bitmap(x, y, bitmap, valid);
 }
 
 static void oled_gfx_render_leds(int x, int y) {
@@ -309,9 +318,9 @@ static void oled_gfx_render_leds(int x, int y) {
         0x00, 0x00, 0x1f, 0x3e, 0x3c, 0x3c, 0x32, 0x20, 0x20, 0x32, 0x3c, 0x3c, 0x3e, 0x1f, 0x00, 0x00
     };
 
-    oled_gfx_render_small_bitmap(x, y, bitmap_caps_lock, (current_leds & (1 << USB_LED_CAPS_LOCK)));
-    oled_gfx_render_small_bitmap(x + 3, y, bitmap_num_lock, (current_leds & (1 << USB_LED_NUM_LOCK)));
-    oled_gfx_render_small_bitmap(x, y + 2, bitmap_scroll_lock, (current_leds & (1 << USB_LED_SCROLL_LOCK)));
+    oled_gfx_render_small_bitmap(x, y, bitmap_caps_lock, (current.leds & (1 << USB_LED_CAPS_LOCK)));
+    oled_gfx_render_small_bitmap(x + 3, y, bitmap_num_lock, (current.leds & (1 << USB_LED_NUM_LOCK)));
+    oled_gfx_render_small_bitmap(x, y + 2, bitmap_scroll_lock, (current.leds & (1 << USB_LED_SCROLL_LOCK)));
 }
 
 static void oled_gfx_render_modes(int x, int y) {
@@ -346,13 +355,15 @@ static void oled_gfx_render_modes(int x, int y) {
     };
 
     const char* bitmap_gui = is_windows() ? bitmap_gui_windows : bitmap_gui_apple;
-    oled_gfx_render_small_bitmap(x, y, bitmap_gui, (current_mods & MOD_MASK_GUI));
-    oled_gfx_render_small_bitmap(x + 3, y, bitmap_ctrl, (current_mods & MOD_MASK_CTRL));
-    oled_gfx_render_small_bitmap(x, y + 2, bitmap_alt, (current_mods & MOD_MASK_ALT));
-    oled_gfx_render_small_bitmap(x + 3, y + 2, bitmap_shift, (current_mods & MOD_MASK_SHIFT));
+    oled_gfx_render_small_bitmap(x, y, bitmap_gui, (current.mods & MOD_MASK_GUI));
+    oled_gfx_render_small_bitmap(x + 3, y, bitmap_ctrl, (current.mods & MOD_MASK_CTRL));
+    oled_gfx_render_small_bitmap(x, y + 2, bitmap_alt, (current.mods & MOD_MASK_ALT));
+    oled_gfx_render_small_bitmap(x + 3, y + 2, bitmap_shift, (current.mods & MOD_MASK_SHIFT));
 }
 
 #else // SHOW_GRAPHICS
+
+// This alternative implementation displays the keyboard states on the left side OLED display as a series of text labels.
 
 void oled_render_os_mode(void) {
     oled_write_P(PSTR("   OS: "), false);
@@ -360,40 +371,33 @@ void oled_render_os_mode(void) {
 }
 
 void oled_render_layer_state(void) {
+    static const char base[] PROGMEM = "Base";
+    static const char super[] PROGMEM = "Super";
+    static const char function[] PROGMEM = "Function";
+    static const char navigation[] PROGMEM = "Navigation";
+    static const char number[] PROGMEM = "Number";
+    static const char *names[] = {base, super, function, navigation, number};
+    const char *name = (0 <= current.layer && current.layer < MAX_LAYERS) ? names[current.layer] : PSTR("Unknown");
     oled_write_P(PSTR("Layer: "), false);
-    switch (current_layer) {
-        case LAYER_NUM:
-            oled_write_ln_P(PSTR("Number"), false);
-            break;
-        case LAYER_NAV:
-            oled_write_ln_P(PSTR("Navigation"), false);
-            break;
-        case LAYER_FUNC:
-            oled_write_ln_P(PSTR("Function"), false);
-            break;
-        case LAYER_SUPER:
-            oled_write_ln_P(PSTR("Super"), false);
-            break;
-        case LAYER_BASE:
-            oled_write_ln_P(PSTR("Base"), false);
-            break;
-    }
+    oled_write_ln_P(name, false);
 }
 
 void oled_render_leds(void) {
+    static const char blank[] PROGMEM = "  ";
     oled_write_P(PSTR(" LEDs: "), false);
-    oled_write_P((current_leds & (1 << USB_LED_CAPS_LOCK)) ? PSTR("L ") : PSTR("  "), false);
-    oled_write_P((current_leds & (1 << USB_LED_NUM_LOCK)) ? PSTR("N ") : PSTR("  "), false);
-    oled_write_P((current_leds & (1 << USB_LED_SCROLL_LOCK)) ? PSTR("S ") : PSTR("  "), false);
+    oled_write_P((current.leds & (1 << USB_LED_CAPS_LOCK)) ? PSTR("L ") : blank, false);
+    oled_write_P((current.leds & (1 << USB_LED_NUM_LOCK)) ? PSTR("N ") : blank, false);
+    oled_write_P((current.leds & (1 << USB_LED_SCROLL_LOCK)) ? PSTR("S ") : blank, false);
     oled_advance_page(true);
 }
 
 void oled_render_mods(void) {
+    static const char blank[] PROGMEM = "  ";
     oled_write_P(PSTR(" Mods: "), false);
-    oled_write_P((current_mods & MOD_MASK_GUI) ? PSTR("O ") : PSTR("  "), false);
-    oled_write_P((current_mods & MOD_MASK_CTRL) ? PSTR("C ") : PSTR("  "), false);
-    oled_write_P((current_mods & MOD_MASK_ALT) ? PSTR("A ") : PSTR("  "), false);
-    oled_write_P((current_mods & MOD_MASK_SHIFT) ? PSTR("S ") : PSTR("  "), false);
+    oled_write_P((current.mods & MOD_MASK_GUI) ? PSTR("O ") : blank, false);
+    oled_write_P((current.mods & MOD_MASK_CTRL) ? PSTR("C ") : blank, false);
+    oled_write_P((current.mods & MOD_MASK_ALT) ? PSTR("A ") : blank, false);
+    oled_write_P((current.mods & MOD_MASK_SHIFT) ? PSTR("S ") : blank, false);
     oled_advance_page(true);
 }
 
@@ -490,10 +494,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
         case KC_VERTICAL_BAR:
               if (os_mode == MAC) {
-                  // On the Mac Canadian Multilanguage Standard layout, vertical bar is just RALT+MINUS.
+                  // On the Mac CSA keyboard layout, vertical bar is just RALT+MINUS.
                   emit_key_event(RALT(KC_MINUS), record);
               } else if (record->event.pressed) {
-                  // On the Windows Canadian Multilanguage Standard layout, vertical bar is unavailable.
+                  // On the Windows CSA keyboard layout, vertical bar is unavailable.
                   // So we swap to US layout, type the vertical bar and swap back.
                   SEND_STRING(SS_LGUI(" ") SS_DELAY(100) "|" SS_LGUI(" "));
               }
@@ -501,7 +505,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
         case KC_NONUS_BSLASH:
             if (os_mode == MAC) {
-                // Mac and Windows swap the placement of NUBS and GRAVE under Canadian Multilanguage Standard.
+                // Mac and Windows swap the placement of NUBS and GRAVE under CSA keyboard layout.
                 emit_key_event(KC_GRAVE, record);
                 return false;
             }
@@ -509,7 +513,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
         case KC_GRAVE:
             if (os_mode == MAC) {
-                // Mac and Windows swap the placement of NUBS and GRAVE under Canadian Multilanguage Standard.
+                // Mac and Windows swap the placement of NUBS and GRAVE under CSA keyboard layout.
                 emit_key_event(KC_NONUS_BSLASH, record);
                 return false;
             }
