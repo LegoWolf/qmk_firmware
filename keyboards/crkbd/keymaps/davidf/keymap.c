@@ -154,10 +154,10 @@ static void get_state( state_t *state ) {
 }
 
 static bool has_state_changed( void ) {
-  state_t state;
-  get_state( &state );
-  return (current.os_mode != state.os_mode) || (current.leds != state.leds) || (current.mods != state.mods) ||
-      (current.default_layer != state.default_layer ) || (current.layer != state.layer);     
+    state_t state;
+    get_state( &state );
+    return (current.os_mode != state.os_mode) || (current.leds != state.leds) || (current.mods != state.mods) ||
+        (current.default_layer != state.default_layer ) || (current.layer != state.layer);     
 }
 
 static void update_state( void ) {
@@ -293,9 +293,9 @@ static void oled_gfx_render_layer_state(int x, int y) {
         0x00, 0x00, 0x07, 0x0f, 0x0f, 0x0f, 0x0f, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
     };
 
-    static const char* bitmaps[] = {bitmap_base, bitmap_super, bitmap_function, bitmap_navigation, bitmap_number};
+    static const char* const bitmaps[] PROGMEM = {bitmap_base, bitmap_super, bitmap_function, bitmap_navigation, bitmap_number};
     bool valid = (0 <= current.layer && current.layer < MAX_LAYERS);
-    const char *bitmap = valid ? bitmaps[current.layer] : NULL;
+    const char *bitmap = valid ? (const char *)pgm_read_word(bitmaps + current.layer) : NULL;
     oled_gfx_render_large_bitmap(x, y, bitmap, valid);
 }
 
@@ -376,8 +376,9 @@ void oled_render_layer_state(void) {
     static const char function[] PROGMEM = "Function";
     static const char navigation[] PROGMEM = "Navigation";
     static const char number[] PROGMEM = "Number";
-    static const char *names[] = {base, super, function, navigation, number};
-    const char *name = (0 <= current.layer && current.layer < MAX_LAYERS) ? names[current.layer] : PSTR("Unknown");
+    static const char * const names[] PROGMEM = {base, super, function, navigation, number};
+    bool valid = (0 <= current.layer && current.layer < MAX_LAYERS);
+    const char *name = valid ? (const char *)pgm_read_word(names + current.layer) : PSTR("Unknown");
     oled_write_P(PSTR("Layer: "), false);
     oled_write_ln_P(name, false);
 }
