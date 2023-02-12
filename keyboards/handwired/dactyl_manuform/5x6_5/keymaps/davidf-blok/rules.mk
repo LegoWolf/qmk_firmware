@@ -1,2 +1,3 @@
 VIA_ENABLE = yes
 LTO_ENABLE = yes
+CONVERT_TO = blok

@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define USE_SERIAL
 
-#define EE_HANDS
+#define MASTER_LEFT
 
 #define KINETIC_SPEED
 
-#define DYNAMIC_KEYMAP_LAYER_COUNT 3
+#define DYNAMIC_KEYMAP_LAYER_COUNT 5
