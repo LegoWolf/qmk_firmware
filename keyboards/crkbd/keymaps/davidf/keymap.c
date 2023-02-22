@@ -53,21 +53,21 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,----------------+------------+----------------+----------------+----------------+-----------------.  ,-----------------+------------------+------------------+----------------+-----------------+----------------.
       KC_ESCAPE,       KC_Q,        KC_W,            KC_E,            KC_R,            KC_T,                KC_Y,             KC_U,              KC_I,              KC_O,            KC_P,             KC_MINUS,
   //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
-      MO(LAYER_SUPER), KC_A,        KC_S,            KC_D,            KC_F,            KC_G,                KC_H,             KC_J,              KC_K,              KC_L,            KC_SCOLON,        MO(LAYER_SUPER),
+      MO(LAYER_SUPER), KC_A,        KC_S,            KC_D,            KC_F,            KC_G,                KC_H,             KC_J,              KC_K,              KC_L,            KC_SCLN,          MO(LAYER_SUPER),
   //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
       OSM(MOD_LSFT),   KC_Z,        KC_X,            KC_C,            KC_V,            KC_B,                KC_N,             KC_M,              KC_COMMA,          KC_DOT,          KC_SLASH,         OSM(MOD_RSFT),
   //`----------------+------------+----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------+-----------------+----------------,
-                                                     TT(LAYER_NAV),   KC_BSPACE,       LCTL_T(KC_TAB),      KC_ENTER,         KC_SPACE,          KC_RALT
+                                                     TT(LAYER_NAV),   KC_BSPC,         LCTL_T(KC_TAB),      KC_ENTER,         KC_SPACE,          KC_RALT
   //                                               `----------------+----------------+-----------------,  `-----------------+------------------+------------------,                                                    
   ),
 
   [LAYER_SUPER] = LAYOUT_split_3x6_3(
   //,----------------+------------+----------------+----------------+----------------+-----------------.  ,-----------------+------------------+------------------+----------------+-----------------+----------------.
-      _______,         KC_BSLASH,   XXXXXXX,         KC_QUOTE,        XXXXXXX,         KC_INSERT,           KC_DELETE,        KC_NONUS_BSLASH,   KC_GRAVE,          KC_LBRACKET,     KC_VBAR,          KC_EQUAL,
+      _______,         KC_BSLS,     XXXXXXX,         KC_QUOTE,        XXXXXXX,         KC_INSERT,           KC_DELETE,        KC_NUBS,           KC_GRAVE,          KC_LBRC,         KC_VBAR,          KC_EQUAL,
   //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
       XXXXXXX,         KC_1,        KC_2,            KC_3,            KC_4,            KC_5,                KC_6,             KC_7,              KC_8,              KC_9,            KC_0,             XXXXXXX,
   //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
-      KC_CAPSLOCK,     XXXXXXX,     XXXXXXX,         KC_RBRACKET,     XXXXXXX,         XXXXXXX,             KC_APPLICATION,   OSM(MOD_LGUI),     OSM(MOD_LCTL),     OSM(MOD_LALT),   OSL(LAYER_FUNC),  _______,
+      KC_CAPS,         XXXXXXX,     XXXXXXX,         KC_RBRC,         XXXXXXX,         XXXXXXX,             KC_APPLICATION,   OSM(MOD_LGUI),     OSM(MOD_LCTL),     OSM(MOD_LALT),   OSL(LAYER_FUNC),  _______,
   //`----------------+------------+----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------+-----------------+----------------,
                                                      TT(LAYER_NUM),   _______,         _______,             KC_OSMODE,        _______,           _______
   //                                               `----------------+----------------+-----------------,  `-----------------+------------------+------------------,                                                    
@@ -79,7 +79,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
       _______,         KC_F1,       KC_F2,           KC_F3,           KC_F4,           KC_F5,               KC_F6,            KC_F7,             KC_F8,             KC_F9,           KC_F10,           _______,
   //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
-      _______,         XXXXXXX,     XXXXXXX,         XXXXXXX,         XXXXXXX,         XXXXXXX,             KC_PAUSE,         KC_PSCREEN,        KC_NUMLOCK,        KC_SCROLLLOCK,   XXXXXXX,          _______,
+      _______,         XXXXXXX,     XXXXXXX,         XXXXXXX,         XXXXXXX,         XXXXXXX,             KC_PAUSE,         KC_PSCR,           KC_LNUM,           KC_LSCR,         XXXXXXX,          _______,
   //`----------------+------------+----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------+-----------------+----------------,
                                                      XXXXXXX,         _______,         _______,             _______,          _______,           _______
   //                                               `----------------+----------------+-----------------,  `-----------------+------------------+------------------,                                                    
@@ -89,7 +89,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,----------------+------------+----------------+----------------+----------------+-----------------.  ,-----------------+------------------+------------------+----------------+-----------------+----------------.
       TT(LAYER_NAV),   XXXXXXX,     KC_HOME,         KC_UP,           KC_END,          KC_PGUP,             KC_PGUP,          KC_HOME,           KC_UP,             KC_END,          XXXXXXX,          XXXXXXX,
   //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
-      _______,         XXXXXXX,     KC_LEFT,         KC_DOWN,         KC_RIGHT,        KC_PGDOWN,           KC_PGDOWN,        KC_LEFT,           KC_DOWN,           KC_RIGHT,        XXXXXXX,          _______,
+      _______,         XXXXXXX,     KC_LEFT,         KC_DOWN,         KC_RIGHT,        KC_PGDN,             KC_PGDN,          KC_LEFT,           KC_DOWN,           KC_RIGHT,        XXXXXXX,          _______,
   //|----------------|------------|----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------|-----------------|----------------|
       _______,         XXXXXXX,     OSM(MOD_LGUI),   OSM(MOD_LCTL),   OSM(MOD_LALT),   XXXXXXX,             XXXXXXX,          OSM(MOD_LGUI),     OSM(MOD_LCTL),     OSM(MOD_LALT),   XXXXXXX,          _______,
   //`----------------+------------+----------------|----------------|----------------|-----------------|  |-----------------|------------------|------------------|----------------+-----------------+----------------,
@@ -504,7 +504,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
               }
             return false;
 
-        case KC_NONUS_BSLASH:
+        case KC_NONUS_BACKSLASH:
             if (os_mode == MAC) {
                 // Mac and Windows swap the placement of NUBS and GRAVE under CSA keyboard layout.
                 emit_key_event(KC_GRAVE, record);
@@ -515,12 +515,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case KC_GRAVE:
             if (os_mode == MAC) {
                 // Mac and Windows swap the placement of NUBS and GRAVE under CSA keyboard layout.
-                emit_key_event(KC_NONUS_BSLASH, record);
+                emit_key_event(KC_NONUS_BACKSLASH, record);
                 return false;
             }
             break;
 
-        case KC_SCROLLLOCK:
+        case KC_SCROLL_LOCK:
             if (os_mode == MAC) {
                 // Suppress scroll lock on Mac. It just gets confused.
                 return false;
