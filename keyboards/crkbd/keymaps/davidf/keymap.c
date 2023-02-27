@@ -362,6 +362,86 @@ static void oled_gfx_render_modes(int x, int y) {
     oled_gfx_render_small_bitmap(x + 3, y + 2, bitmap_shift, (current.mods & MOD_MASK_SHIFT));
 }
 
+#if 0
+typedef struct {
+    const char *bitmap;
+    int width;
+    int height;
+} sprite_t;
+
+static void oled_write_sprite( int x, int y, sprite_t *sprite, bool enabled ) {
+    int16_t display_width = is_keyboard_master() ? OLED_DISPLAY_HEIGHT : OLED_DISPLAY_WIDTH;
+    int16_t display_height = is_keyboard_master() ? OLED_DISPLAY_WIDTH : OLED_DISPLAY_HEIGHT;
+    // oled_buffer_reader_t reader = oled_read_raw( 0 );
+
+    if( (-sprite->width < x) && (x < display_width) && (-sprite->height < y) && (y < display_height) ) {
+        int16_t sprite_height = sprite->height >> 3;
+        int16_t xstart = x >= 0 ? 0 : -x;
+        int16_t xstop = (x + sprite->width <= display_width) ? sprite->width : (display_width - x);
+        int16_t ystart = y >= 0 ? 0 : (-y >> 3);
+        int16_t ystop = ((y >> 3) + sprite_height <= (display_height >> 3)) ?
+            sprite_height : ((display_height - y) >> 3);
+
+        int16_t sprite_pos = ystart * sprite->width;
+        int16_t frame_pos = x + ((y >> 3) + ystart) * display_width;
+
+        for( int16_t sy = ystart; sy < ystop; sy++ ) {
+            sprite_pos += xstart;
+            frame_pos += xstart;
+            for( int16_t sx = xstart; sx < xstop; sx++ ) {
+                uint8_t byte = enabled ? pgm_read_byte( sprite->bitmap + sprite_pos ) : 0x00;
+                oled_write_raw_byte( byte, frame_pos );
+                sprite_pos++;
+                frame_pos++;
+            }
+            sprite_pos += sprite->width - xstop;
+            frame_pos += display_width - xstop;
+        }
+    }
+}
+
+static void oled_animate( void ) {
+    // static const char bitmap_gui_apple [] PROGMEM = {
+    //     0x00, 0x18, 0x3c, 0x66, 0x66, 0xfc, 0xf8, 0x60, 0x60, 0xf8, 0xfc, 0x66, 0x66, 0x3c, 0x18, 0x00, 
+    //     0x00, 0x18, 0x3c, 0x66, 0x66, 0x3f, 0x1f, 0x06, 0x06, 0x1f, 0x3f, 0x66, 0x66, 0x3c, 0x18, 0x00
+    // };
+    // static sprite_t sprite_apple = { bitmap_gui_apple, 16, 16 };
+    static int x = 0;
+    static int y = -32;
+
+    static const char bitmap_gui_apple [] PROGMEM = {
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+        0xe0, 0xf8, 0x7c, 0x7c, 0x1e, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+        0x00, 0x00, 0x00, 0xc0, 0xf0, 0xfc, 0xfe, 0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0xfe, 
+        0xfe, 0xfe, 0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f, 0x1e, 0x0c, 0x00, 0x00, 0x00, 0x00, 0x00, 
+        0x00, 0x00, 0x00, 0x0f, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
+        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfc, 0xf0, 0xc0, 0xc0, 0x00, 0x00, 0x00, 0x00, 
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x07, 0x1f, 0x3f, 0x3f, 0x7f, 0x7f, 0x7f, 0x7f, 0x3f, 0x3f, 
+        0x3f, 0x3f, 0x3f, 0x7f, 0x7f, 0x7f, 0x7f, 0x3f, 0x3f, 0x0f, 0x07, 0x01, 0x00, 0x00, 0x00, 0x00
+    };
+    static sprite_t sprite_apple = { bitmap_gui_apple, 32, 32 };
+
+    // for( uint16_t i = 0; i < OLED_MATRIX_SIZE; i++ ) {
+    //     oled_write_raw_byte( i, i );
+    // }
+
+    oled_write_sprite(x, y, &sprite_apple, false);
+    if( y < 128 - sprite_apple.height ) {
+        y += 8;
+    } else {
+        y = 128 - sprite_apple.height;
+
+        if( x < 32 ) {
+            x++;
+        } else {
+            x = 0;
+            y = -sprite_apple.height;
+        }
+    }
+    oled_write_sprite(x, y, &sprite_apple, true);
+}
+#endif
+
 #else // SHOW_GRAPHICS
 
 // This alternative implementation displays the keyboard states on the left side OLED display as a series of text labels.
@@ -447,7 +527,7 @@ bool oled_task_user(void) {
             oled_render_mods();
 #         endif
         }
-
+        // oled_animate();
     } else {
         oled_render_logo();
     }
