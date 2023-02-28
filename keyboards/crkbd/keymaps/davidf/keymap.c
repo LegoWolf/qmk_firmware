@@ -375,6 +375,12 @@ static void oled_write_sprite( int x, int y, sprite_t *sprite, bool enabled ) {
     // oled_buffer_reader_t reader = oled_read_raw( 0 );
 
     if( (-sprite->width < x) && (x < display_width) && (-sprite->height < y) && (y < display_height) ) {
+        int16_t yshift = y % 8;
+        if( yshift < 0 ) {
+            y -= yshift + 8;
+            yshift += 8;
+        }
+
         int16_t sprite_height = sprite->height >> 3;
         int16_t xstart = x >= 0 ? 0 : -x;
         int16_t xstop = (x + sprite->width <= display_width) ? sprite->width : (display_width - x);
@@ -382,14 +388,29 @@ static void oled_write_sprite( int x, int y, sprite_t *sprite, bool enabled ) {
         int16_t ystop = ((y >> 3) + sprite_height <= (display_height >> 3)) ?
             sprite_height : ((display_height - y) >> 3);
 
+        if( yshift > 0 ) {
+            ystop++;
+        }
+
         int16_t sprite_pos = ystart * sprite->width;
         int16_t frame_pos = x + ((y >> 3) + ystart) * display_width;
+        uint8_t byte;
 
         for( int16_t sy = ystart; sy < ystop; sy++ ) {
             sprite_pos += xstart;
             frame_pos += xstart;
             for( int16_t sx = xstart; sx < xstop; sx++ ) {
-                uint8_t byte = enabled ? pgm_read_byte( sprite->bitmap + sprite_pos ) : 0x00;
+                if( !enabled ) {
+                    byte = 0x00;
+                } else if( yshift > 0 ) {
+                    byte = (sy > 0) ? pgm_read_byte( sprite->bitmap + sprite_pos - sprite->width ) >> (8 - yshift) : 0;
+                    if( sy < sprite_height ) {
+                        byte |= pgm_read_byte( sprite->bitmap + sprite_pos ) << yshift;
+                    }  
+                } else {
+                    byte = pgm_read_byte( sprite->bitmap + sprite_pos );
+                }
+
                 oled_write_raw_byte( byte, frame_pos );
                 sprite_pos++;
                 frame_pos++;
@@ -427,7 +448,7 @@ static void oled_animate( void ) {
 
     oled_write_sprite(x, y, &sprite_apple, false);
     if( y < 128 - sprite_apple.height ) {
-        y += 8;
+        y += 3;
     } else {
         y = 128 - sprite_apple.height;
 
