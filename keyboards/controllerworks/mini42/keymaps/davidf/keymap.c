@@ -74,13 +74,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [LAYER_FUNC] = LAYOUT_split_3x6_3(
       XXXXXXX,         KC_F11,      KC_F12,        KC_F13,         KC_F14,        KC_F15,              KC_F16,           KC_BRID,       KC_BRIU,       KC_MSCT,       KC_LCPD,       XXXXXXX,
       XXXXXXX,         KC_F1,       KC_F2,         KC_F3,          KC_F4,         KC_F5,               KC_F6,            KC_F7,         KC_F8,         KC_F9,         KC_F10,        XXXXXXX,
-      _______,         KC_PAUS,     KC_PSCR,       KC_NUM,         KC_SCRL,       XXXXXXX,             XXXXXXX,          RGB_RMOD,      RGB_MOD,       RGB_TOG,       XXXXXXX,       _______,
+      _______,         KC_PAUS,     KC_PSCR,       KC_NUM,         KC_SCRL,       RGB_TOG,             RGB_MOD,          RGB_HUI,       RGB_SAI,       RGB_VAI,       RGB_SPI,       _______,
                                                    _______,        _______,       _______,             _______,          _______,       _______
   ),
 
   [LAYER_SUPER] = LAYOUT_split_3x6_3(
       XXXXXXX,         XXXXXXX,     S(KC_LBRC),    KC_QUOT,        RALT(KC_LBRC), KC_INS,              KC_DEL,           KC_NUBS,       KC_GRV,        KC_LBRC,       KC_VBAR,       KC_EQL,
-      XXXXXXX,         KC_NUHS,     RALT(KC_RBRC), RALT(KC_COMM),  RALT(KC_DOT),  KC_GRV,              S(KC_GRV),        RALT(KC_7),    RALT(KC_8),    RALT(KC_9),    RALT(KC_0),    S(KC_EQL),
+      XXXXXXX,         KC_NUHS,     RALT(KC_RBRC), RALT(KC_COMM),  RALT(KC_DOT),  S(KC_GRV),           KC_GRV,           RALT(KC_7),    RALT(KC_8),    RALT(KC_9),    RALT(KC_0),    S(KC_EQL),
       KC_CAPS,         RALT(KC_Z),  RALT(KC_X),    KC_RBRC,        XXXXXXX,       XXXXXXX,             KC_APP,           OSM(MOD_LGUI), OSM(MOD_LCTL), OSM(MOD_LALT), OSM(MOD_RALT), KC_CAPS,
                                                    TG(LAYER_GAME), _______,       _______,             _______,          _______,       KC_OSMODE                                                  
   ),
