@@ -41,12 +41,14 @@ typedef enum {
 #endif
     KC_VERTICAL_BAR,
     KC_MISSION_CONTROL,
-    KC_LAUNCHPAD
+    KC_LAUNCHPAD,
+    KC_ANIMATE
 } custom_keycodes_t;
 
 #define KC_VBAR KC_VERTICAL_BAR 
 #define KC_MSCT KC_MISSION_CONTROL 
 #define KC_LCPD KC_LAUNCHPAD
+#define KC_ANIM KC_ANIMATE
 #define MAX_LAYERS (LAYER_GAME + 1)
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -87,7 +89,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [LAYER_GAME] = LAYOUT_split_3x6_3(
       KC_ESC,          KC_T,        KC_Q,          KC_W,           KC_E,          KC_R,                KC_PSLS,          KC_P7,         KC_P8,         KC_P9,         KC_PPLS,       TG(LAYER_GAME),
-      KC_TAB,          KC_G,        KC_A,          KC_S,           KC_D,          KC_F,                KC_P0,            KC_P4,         KC_P5,         KC_P6,         KC_PMNS,       XXXXXXX,
+      KC_TAB,          KC_G,        KC_A,          KC_S,           KC_D,          KC_F,                KC_P0,            KC_P4,         KC_P5,         KC_P6,         KC_PMNS,       KC_ANIM,
       KC_LSFT,         KC_B,        KC_Z,          KC_X,           KC_C,          KC_V,                KC_PAST,          KC_P1,         KC_P2,         KC_P3,         KC_PCMM,       KC_RSFT,
                                                    KC_LCTL,        KC_ENT,        KC_SPC,              KC_PENT,          KC_PEQL,       KC_PDOT                                                 
   )
@@ -104,6 +106,12 @@ static os_modes_t os_mode = WIN;
 #define SMALL_ICON_SIZE 32
 #define LARGE_ICON_SIZE 128
 #define SHOW_GRAPHICS
+
+#define RGB_INDEX_E 17
+#define RGB_INDEX_S 19
+#define RGB_INDEX_D 16
+#define RGB_INDEX_F 11
+#define RGB_INDEX_MINS 51
 
 typedef struct {
     os_modes_t os_mode;
@@ -178,6 +186,8 @@ static void update_state( void ) {
 }
 
 #ifdef SHOW_GRAPHICS
+
+static bool animate = false;
 
 // This graphical implementation displays the keyboard state on the left side OLED display as a series of icons.
 
@@ -384,8 +394,6 @@ static void oled_gfx_render_modes(int x, int y) {
     oled_gfx_render_small_bitmap(x, y + 2, bitmap_alt, (current.mods & MOD_MASK_ALT));
     oled_gfx_render_small_bitmap(x + 3, y + 2, bitmap_shift, (current.mods & MOD_MASK_SHIFT));
 }
-
-#if 0
 
 typedef enum {
     CYCLE,
@@ -788,7 +796,6 @@ static void oled_animate_lemmings( void ) {
     }
     oled_sprite_update(x, y, &sprite_lemming, true);
 }
-#endif
 
 #else // SHOW_GRAPHICS
 
@@ -806,7 +813,7 @@ void oled_render_layer_state(void) {
     static const char super[] PROGMEM = "Super";
     static const char function[] PROGMEM = "Function";
     static const char game[] PROGMEM = "Game";
-    static const char * const names[] PROGMEM = {base, navigation, number, super, function, game};
+    static const char * const names[] PROGMEM = {base, navigation, number, function, super, game};
     bool valid = (0 <= current.layer && current.layer < MAX_LAYERS);
     const char *name = valid ? (const char *)pgm_read_ptr(names + current.layer) : PSTR("Unknown");
     oled_write_P(PSTR("Layer: "), false);
@@ -851,32 +858,45 @@ void render_bootmagic_status(bool status) {
 
 oled_rotation_t oled_init_user(oled_rotation_t rotation) {
   if (!is_keyboard_master()) {
-    return OLED_ROTATION_180;  // flips the display 180 degrees if offhand
+    return OLED_ROTATION_0;
   }
 #ifdef SHOW_GRAPHICS
   return OLED_ROTATION_90;
 #else
-  return OLED_ROTATION_0;
+  return OLED_ROTATION_180; // flips the display 180 degrees if offhand
 #endif
 }
 
 bool oled_task_user(void) {
     if (is_keyboard_master()) {
-        if (force_render || has_state_changed()) {
-          update_state();
-#         ifdef SHOW_GRAPHICS
+#ifdef SHOW_GRAPHICS
+        layer_state_t layer = get_highest_layer(layer_state);
+        force_render = force_render ||
+                       ((layer == LAYER_GAME) && (current.layer != LAYER_GAME)) ||
+                       ((layer != LAYER_GAME) && (current.layer == LAYER_GAME));
+
+        if( force_render ) {
+            oled_clear();
+        }
+
+        if(animate && get_highest_layer(layer_state) == LAYER_GAME) {
+            oled_animate_lemmings();
+        } else if (force_render || has_state_changed()) {
+            update_state();
             oled_gfx_render_os_mode(0, 0);
             oled_gfx_render_layer_state(0, 4);
             oled_gfx_render_leds(0, 8);
             oled_gfx_render_modes(0, 12);
-#         else
+        }
+#else
+        if (force_render || has_state_changed()) {
+            update_state();
             oled_render_os_mode();
             oled_render_layer_state();
             oled_render_leds();
             oled_render_mods();
-#         endif
         }
-        // oled_animate_lemmings();
+#endif
     } else {
         oled_render_logo();
         oled_scroll_left();
@@ -885,7 +905,7 @@ bool oled_task_user(void) {
 }
 
 void keyboard_post_init_user( void ) {
-  update_state();
+    update_state();
 }
 
 #endif // OLED_ENABLE
@@ -899,12 +919,47 @@ void emit_key_event(uint16_t keycode, keyrecord_t *record)
     }  
 }
 
+bool swap_key_event(uint16_t keycode, keyrecord_t *record)
+{
+    if (os_mode == MAC) {
+        emit_key_event(keycode, record);
+        return false;
+    }
+    return true;
+}
+
+bool rgb_matrix_indicators_user(void) {
+    state_t state;
+    get_state(&state);
+    if(state.layer == LAYER_GAME) {
+        HSV hsv = {HSV_WHITE};
+        uint16_t value = rgb_matrix_get_val() * 2;
+        hsv.v = value < 256 ? (uint8_t)value : 255;
+        RGB rgb = hsv_to_rgb(hsv);
+        rgb_matrix_set_color(RGB_INDEX_E, rgb.r, rgb.g, rgb.b);
+        rgb_matrix_set_color(RGB_INDEX_S, rgb.r, rgb.g, rgb.b);
+        rgb_matrix_set_color(RGB_INDEX_D, rgb.r, rgb.g, rgb.b);
+        rgb_matrix_set_color(RGB_INDEX_F, rgb.r, rgb.g, rgb.b);
+        rgb_matrix_set_color(RGB_INDEX_MINS, rgb.r, rgb.g, rgb.b);
+        return false;
+    }
+    return true;
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case KC_OSMODE:
             if (record->event.pressed) {
                 // Switch OS mode.
                 os_mode = (os_mode == WIN) ? MAC : WIN;
+            }
+            return false;
+
+        case KC_ANIMATE:
+            if (record->event.pressed) {
+                // Switch OS mode.
+                animate = !animate;
+                force_render = true;
             }
             return false;
 
@@ -930,46 +985,20 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                   emit_key_event(RALT(KC_MINUS), record);
               } else if (record->event.pressed) {
                   // On the Windows CSA keyboard layout, vertical bar is unavailable.
-                  // So we swap to US layout, type the vertical bar and swap back.
+                  // So we swap to the US layout, type the vertical bar and swap back.
                   SEND_STRING(SS_LGUI(" ") SS_DELAY(100) "|" SS_LGUI(" "));
               }
             return false;
 
-        case KC_NONUS_BACKSLASH:
-            if (os_mode == MAC) {
-                // Mac and Windows swap the placement of NUBS and GRAVE under CSA keyboard layout.
-                emit_key_event(KC_GRAVE, record);
-                return false;
-            }
-            break;
-
-        case S(KC_NONUS_BACKSLASH):
-            if (os_mode == MAC) {
-                // Mac and Windows swap the placement of NUBS and GRAVE under CSA keyboard layout.
-                emit_key_event(S(KC_GRAVE), record);
-                return false;
-            }
-            break;
-
-        case KC_GRAVE:
-            if (os_mode == MAC) {
-                // Mac and Windows swap the placement of NUBS and GRAVE under CSA keyboard layout.
-                emit_key_event(KC_NONUS_BACKSLASH, record);
-                return false;
-            }
-            break;
-
-        case S(KC_GRAVE):
-            if (os_mode == MAC) {
-                // Mac and Windows swap the placement of NUBS and GRAVE under CSA keyboard layout.
-                emit_key_event(S(KC_NONUS_BACKSLASH), record);
-                return false;
-            }
-            break;
+        // Mac and Windows swap the placement of NUBS and GRAVE under CSA keyboard layout.
+        case KC_NONUS_BACKSLASH: return swap_key_event(KC_GRAVE, record);
+        case S(KC_NONUS_BACKSLASH): return swap_key_event(S(KC_GRAVE), record);
+        case KC_GRAVE: return swap_key_event(KC_NONUS_BACKSLASH, record);
+        case S(KC_GRAVE): return swap_key_event(S(KC_NONUS_BACKSLASH), record);
 
         case KC_SCROLL_LOCK:
             if (os_mode == MAC) {
-                // Suppress scroll lock on Mac. It just gets confused.
+                // Suppress scroll lock on Mac. The OS just gets confused.
                 return false;
             }
             break;
