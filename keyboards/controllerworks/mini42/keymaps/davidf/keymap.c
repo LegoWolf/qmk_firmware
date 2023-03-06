@@ -413,8 +413,14 @@ typedef struct {
 } animation_t;
 
 typedef struct {
+    int originx;
+    int originy;
+} frame_t;
+
+typedef struct {
     const char *bitmaps;
     const animation_t *anims;
+    const frame_t *frames;
     int framesize;
     int numframes;
     int curframe;
@@ -642,6 +648,18 @@ static const char bitmaps_lemming [] PROGMEM = {
     0x00,  0x00,  0x00,  0x00,  0x00,  0x00,  0x01,  0x01,  0x01,  0x01,  0x01,  0x00,  0x00,  0x00,  0x00,  0x00,  0x00,  0x00,  0x00,  0x00 
 };
 
+static const frame_t frames_lemming[LEMMING_FRAME_NUM] = {
+    { 11, 24 }, { 11, 24 }, { 11, 24 }, { 11, 24 }, { 11, 24 },
+    { 11, 24 }, { 11, 24 }, { 11, 24 }, { 11, 24 }, { 11, 24 },
+    { 11, 24 }, { 11, 24 }, { 11, 24 }, { 11, 24 }, { 11, 24 },
+    { 11, 24 }, { 11, 30 }, { 11, 30 }, { 11, 30 }, { 11, 30 },
+    { 11, 30 }, { 11, 30 }, { 11, 30 }, { 11, 30 }, { 11, 30 },
+    { 11, 30 }, { 11, 30 }, { 11, 30 }, { 11, 30 }, { 11, 30 },
+    { 11, 30 }, { 11, 30 }, { 11, 30 }, { 11, 30 }, { 11, 30 },
+    { 11, 30 }, { 11, 30 }, { 11, 30 }, { 11, 30 }, { 11, 30 },
+    { 11, 30 }, { 11, 30 }
+};
+
 #define LEMMING_ANIM_NUM 4
 #define LEMMING_ANIM_WALK 0
 #define LEMMING_ANIM_WALK2FALL 1
@@ -649,8 +667,8 @@ static const char bitmaps_lemming [] PROGMEM = {
 #define LEMMING_ANIM_FALL2WALK 3
 
 static const animation_t anims_lemming[LEMMING_ANIM_NUM] = {
-    { 0, 17, CYCLE },
-    { 17, 21, SINGLE },
+    { 0, 16, CYCLE },
+    { 16, 21, SINGLE },
     { 21, 38, CYCLE },
     { 38, 42, SINGLE }
 };
@@ -707,7 +725,7 @@ static void oled_write_bitmap( int x, int y, const char *bitmap, int width, int 
     }
 }
 
-static void oled_sprite_init( sprite_t *sprite, const char *bitmaps, int width, int height, int numframes ) {
+static void oled_sprite_init( sprite_t *sprite, const char *bitmaps, const frame_t *frames, int width, int height, int numframes ) {
     sprite->bitmaps = bitmaps;
     sprite->width = width;
     sprite->height = height;
@@ -717,6 +735,7 @@ static void oled_sprite_init( sprite_t *sprite, const char *bitmaps, int width, 
     sprite->anims = NULL;
     sprite->numanims = 0;
     sprite->curanim = -1;
+    sprite->frames = frames;
 }
 
 static void oled_sprite_init_anims( sprite_t *sprite, const animation_t *anims, int numanims ) {
@@ -747,6 +766,12 @@ static anim_state_t oled_sprite_get_anim_state( sprite_t *sprite, int anim ) {
 }
 
 static void oled_sprite_update( int x, int y, sprite_t *sprite, bool enabled ) {
+    if( sprite->frames != NULL ) {
+        const frame_t *frame = &sprite->frames[sprite->curframe];
+        x -= frame->originx;
+        y -= frame->originy;
+    }
+
     oled_write_bitmap( x, y, sprite->bitmaps + sprite->curframe * sprite->framesize,
         sprite->width, sprite->height, enabled );
 
@@ -764,34 +789,34 @@ static void oled_sprite_update( int x, int y, sprite_t *sprite, bool enabled ) {
 }
 
 static void oled_animate_lemmings( void ) {
-    static int x = 0;
-    static int y = -32;
+    static int x = LEMMING_FRAME_WIDTH / 2;
+    static int y = -LEMMING_FRAME_HEIGHT;
     static sprite_t sprite_lemming;
     static bool init = false;
 
     if( !init ) {
-        oled_sprite_init( &sprite_lemming, bitmaps_lemming, LEMMING_FRAME_WIDTH, LEMMING_FRAME_HEIGHT, LEMMING_FRAME_NUM );
+        oled_sprite_init( &sprite_lemming, bitmaps_lemming, frames_lemming, LEMMING_FRAME_WIDTH, LEMMING_FRAME_HEIGHT, LEMMING_FRAME_NUM );
         oled_sprite_init_anims( &sprite_lemming, anims_lemming, LEMMING_ANIM_NUM );
         oled_sprite_play_anim( &sprite_lemming, LEMMING_ANIM_FALL );
         init = true;
     }
     
     oled_sprite_update(x, y, &sprite_lemming, false);
-    if( y < 128 - sprite_lemming.height ) {
+    if( y < 128 ) {
         y += 3;
-    } else if( x == 0 ) {
+    } else if( x == LEMMING_FRAME_WIDTH / 2 ) {
         if( oled_sprite_get_anim_state( &sprite_lemming, LEMMING_ANIM_FALL ) == PLAYING ) {
-            y = 128 - sprite_lemming.height;
+            y = 128;
             oled_sprite_play_anim( &sprite_lemming, LEMMING_ANIM_FALL2WALK );
         } else if( oled_sprite_get_anim_state( &sprite_lemming, LEMMING_ANIM_FALL2WALK ) == COMPLETED ) {
             oled_sprite_play_anim( &sprite_lemming, LEMMING_ANIM_WALK );
             x++;
         }
-    } else if( x < 32 && oled_sprite_get_anim_state( &sprite_lemming, LEMMING_ANIM_WALK ) == PLAYING ) {
+    } else if( x < 32 + LEMMING_FRAME_WIDTH / 2 && oled_sprite_get_anim_state( &sprite_lemming, LEMMING_ANIM_WALK ) == PLAYING ) {
         x++;
     } else {
-        x = 0;
-        y = -sprite_lemming.height;
+        x = LEMMING_FRAME_WIDTH / 2;
+        y = -LEMMING_FRAME_HEIGHT;
         oled_sprite_play_anim( &sprite_lemming, LEMMING_ANIM_FALL );
     }
     oled_sprite_update(x, y, &sprite_lemming, true);
