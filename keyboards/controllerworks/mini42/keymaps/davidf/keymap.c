@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include QMK_KEYBOARD_H
-#include <stdio.h>
+#include <keymap_canadian_multilingual.h>
 
 typedef enum {
     LAYER_BASE,
@@ -36,28 +36,42 @@ typedef enum {
 
 typedef enum {
 #ifdef VIA_ENABLE
-    KC_OSMODE = USER00,
+    KC_OSMODE = QK_USER_0,
 #else
     KC_OSMODE = SAFE_RANGE,
 #endif
-    KC_VERTICAL_BAR,
-    KC_MISSION_CONTROL,
-    KC_LAUNCHPAD,
-    KC_ANIMATE
+    KC_VERTICAL_BAR,        // QK_USER_1
+    KC_ANIMATE,             // QK_USER_2
+    KC_A_CIRCUMFLEX,        // QK_USER_3
+    KC_E_CIRCUMFLEX,        // QK_USER_4
+    KC_E_DIAERESIS,         // QK_USER_5
+    KC_I_CIRCUMFLEX,        // QK_USER_6
+    KC_I_DIAERESIS,         // QK_USER_7
+    KC_O_CIRCUMFLEX,        // QK_USER_8
+    KC_U_CIRCUMFLEX,        // QK_USER_9
+    KC_U_DIAERESIS,         // QK_USER_10
+    KC_Y_DIAERESIS          // QK_USER_11
 } custom_keycodes_t;
 
 #define KC_VBAR KC_VERTICAL_BAR 
-#define KC_MSCT KC_MISSION_CONTROL 
-#define KC_LCPD KC_LAUNCHPAD
 #define KC_ANIM KC_ANIMATE
+#define KC_ACIR KC_A_CIRCUMFLEX
+#define KC_ECIR KC_E_CIRCUMFLEX
+#define KC_EDIA KC_E_DIAERESIS
+#define KC_ICIR KC_I_CIRCUMFLEX
+#define KC_OCIR KC_O_CIRCUMFLEX
+#define KC_IDIA KC_I_DIAERESIS
+#define KC_UCIR KC_U_CIRCUMFLEX
+#define KC_UDIA KC_U_DIAERESIS
+#define KC_YDIA KC_Y_DIAERESIS
 #define MAX_LAYERS (LAYER_GAME + 1)
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [LAYER_BASE] = LAYOUT_split_3x6_3(
       KC_ESC,          KC_Q,        KC_W,          KC_E,           KC_R,          KC_T,                KC_Y,             KC_U,          KC_I,          KC_O,          KC_P,          KC_MINS,
       MO(LAYER_SUPER), KC_A,        KC_S,          KC_D,           KC_F,          KC_G,                KC_H,             KC_J,          KC_K,          KC_L,          KC_SCLN,       MO(LAYER_SUPER),
-      OSM(MOD_LSFT),   KC_Z,        KC_X,          KC_C,           KC_V,          KC_B,                KC_N,             KC_M,          KC_COMMA,      KC_DOT,        KC_SLASH,      OSM(MOD_RSFT),
-                                                   FN_MO13,        KC_BSPC,       LCTL_T(KC_TAB),      KC_ENTER,         KC_SPACE,      FN_MO23
+      OSM(MOD_LSFT),   KC_Z,        KC_X,          KC_C,           KC_V,          KC_B,                KC_N,             KC_M,          KC_COMMA,      KC_DOT,        CA_EACU,       OSM(MOD_RSFT),
+                                                   TL_LOWR,        KC_BSPC,       LCTL_T(KC_TAB),      KC_ENTER,         KC_SPACE,      TL_UPPR
   ),
 
   [LAYER_NAV] = LAYOUT_split_3x6_3(
@@ -75,16 +89,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   [LAYER_FUNC] = LAYOUT_split_3x6_3(
-      XXXXXXX,         KC_F11,      KC_F12,        KC_F13,         KC_F14,        KC_F15,              KC_F16,           KC_BRID,       KC_BRIU,       KC_MSCT,       KC_LCPD,       XXXXXXX,
+      XXXXXXX,         KC_F11,      KC_F12,        KC_F13,         KC_F14,        KC_F15,              KC_F16,           KC_BRID,       KC_BRIU,       KC_MCTL,       KC_LPAD,       XXXXXXX,
       XXXXXXX,         KC_F1,       KC_F2,         KC_F3,          KC_F4,         KC_F5,               KC_F6,            KC_F7,         KC_F8,         KC_F9,         KC_F10,        XXXXXXX,
       _______,         KC_PAUS,     KC_PSCR,       KC_NUM,         KC_SCRL,       RGB_TOG,             RGB_MOD,          RGB_HUI,       RGB_SAI,       RGB_VAI,       RGB_SPI,       _______,
                                                    _______,        _______,       _______,             _______,          _______,       _______
   ),
 
   [LAYER_SUPER] = LAYOUT_split_3x6_3(
-      XXXXXXX,         XXXXXXX,     S(KC_LBRC),    KC_QUOT,        RALT(KC_LBRC), KC_INS,              KC_DEL,           KC_NUBS,       KC_GRV,        KC_LBRC,       KC_VBAR,       KC_EQL,
-      XXXXXXX,         KC_NUHS,     RALT(KC_RBRC), RALT(KC_COMM),  RALT(KC_DOT),  S(KC_GRV),           KC_GRV,           RALT(KC_7),    RALT(KC_8),    RALT(KC_9),    RALT(KC_0),    S(KC_EQL),
-      KC_CAPS,         RALT(KC_Z),  RALT(KC_X),    KC_RBRC,        XXXXXXX,       XXXXXXX,             KC_APP,           OSM(MOD_LGUI), OSM(MOD_LCTL), OSM(MOD_LALT), OSM(MOD_RALT), KC_CAPS,
+      XXXXXXX,         XXXXXXX,     CA_DIAE,       CA_EGRV,        CA_GRV,        KC_INS,              KC_DEL,           CA_UGRV,       CA_SLSH,       CA_CIRC,       KC_VBAR,       KC_EQL,
+      XXXXXXX,         CA_AGRV,     CA_DTIL,       CA_LABK,        CA_RABK,       CA_BSLS,             CA_SLSH,          CA_LCBR,       CA_RCBR,       CA_LBRC,       CA_RBRC,       CA_PLUS,
+      KC_CAPS,         CA_LDAQ,     CA_RDAQ,       CA_CCED,        XXXXXXX,       XXXXXXX,             KC_APP,           OSM(MOD_LGUI), OSM(MOD_LCTL), OSM(MOD_LALT), OSM(MOD_RALT), KC_CAPS,
                                                    TG(LAYER_GAME), _______,       _______,             _______,          _______,       KC_OSMODE                                                  
   ),
 
@@ -936,7 +950,7 @@ void keyboard_post_init_user( void ) {
 
 #endif // OLED_ENABLE
 
-void emit_key_event(uint16_t keycode, keyrecord_t *record)
+static void emit_key_event(uint16_t keycode, keyrecord_t *record)
 {
     if (record->event.pressed) {
         register_code16(keycode);
@@ -945,13 +959,25 @@ void emit_key_event(uint16_t keycode, keyrecord_t *record)
     }  
 }
 
-bool swap_key_event(uint16_t keycode, keyrecord_t *record)
+static bool swap_key_event(uint16_t keycode, keyrecord_t *record)
 {
     if (os_mode == MAC) {
         emit_key_event(keycode, record);
         return false;
     }
     return true;
+}
+
+static bool send_deadkey_event(uint16_t deadkeycode, uint16_t keycode, keyrecord_t *record)
+{
+    if( record->event.pressed ) {
+        uint8_t mods = get_mods() & (MOD_MASK_SHIFT | MOD_BIT(KC_RALT));
+        del_mods(mods);
+        tap_code16(deadkeycode);
+        add_mods(mods);
+        tap_code16(keycode);
+    }
+    return false;
 }
 
 bool rgb_matrix_indicators_user(void) {
@@ -982,28 +1008,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false;
 
         case KC_ANIMATE:
+#ifdef SHOW_GRAPHICS
             if (record->event.pressed) {
                 // Switch OS mode.
                 animate = !animate;
                 force_render = true;
             }
+#endif
             return false;
-
-        case KC_MISSION_CONTROL:
-            if (os_mode == MAC) {
-                // Send the mission control key command.
-                host_consumer_send(record->event.pressed ? 0x29F : 0);
-                return false;
-            }
-            break;
-
-        case KC_LAUNCHPAD:
-            if (os_mode == MAC) {
-                // Send the launch pad key command.
-                host_consumer_send(record->event.pressed ? 0x2A0 : 0);
-                return false;
-            }
-            break;
 
         case KC_VERTICAL_BAR:
               if (os_mode == MAC) {
@@ -1016,18 +1028,27 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
               }
             return false;
 
-        // Mac and Windows swap the placement of NUBS and GRAVE under CSA keyboard layout.
-        case KC_NONUS_BACKSLASH: return swap_key_event(KC_GRAVE, record);
-        case S(KC_NONUS_BACKSLASH): return swap_key_event(S(KC_GRAVE), record);
-        case KC_GRAVE: return swap_key_event(KC_NONUS_BACKSLASH, record);
-        case S(KC_GRAVE): return swap_key_event(S(KC_NONUS_BACKSLASH), record);
+        // Single-stroke versions of keys that normally require deadkey composition.
+        case KC_A_CIRCUMFLEX: return send_deadkey_event(CA_CIRC, KC_A, record);
+        case KC_E_CIRCUMFLEX: return send_deadkey_event(CA_CIRC, KC_E, record);
+        case KC_E_DIAERESIS: return send_deadkey_event(CA_DIAE, KC_E, record);
+        case KC_I_CIRCUMFLEX: return send_deadkey_event(CA_CIRC, KC_I, record);
+        case KC_I_DIAERESIS: return send_deadkey_event(CA_DIAE, KC_I, record);
+        case KC_O_CIRCUMFLEX: return send_deadkey_event(CA_CIRC, KC_O, record);
+        case KC_U_CIRCUMFLEX: return send_deadkey_event(CA_CIRC, KC_U, record);
+        case KC_U_DIAERESIS: return send_deadkey_event(CA_DIAE, KC_U, record);
+        case KC_Y_DIAERESIS: return send_deadkey_event(CA_DIAE, KC_Y, record);
 
-        case KC_SCROLL_LOCK:
-            if (os_mode == MAC) {
-                // Suppress scroll lock on Mac. The OS just gets confused.
-                return false;
-            }
-            break;
+        // Mac and Windows swap the placement of KC_NUBS and CA_SLSH under CSA keyboard layout.
+        case KC_NONUS_BACKSLASH: return swap_key_event(CA_SLSH, record);
+        case S(KC_NONUS_BACKSLASH): return swap_key_event(S(CA_SLSH), record);
+        case CA_SLSH: return swap_key_event(KC_NONUS_BACKSLASH, record);
+        case S(CA_SLSH): return swap_key_event(S(KC_NONUS_BACKSLASH), record);
+
+        // Suppress keys that confuse the current OS.
+        case KC_SCROLL_LOCK: return (os_mode != MAC);
+        case KC_MISSION_CONTROL: return (os_mode == MAC);
+        case KC_LAUNCHPAD: return (os_mode == MAC);
 
         case LCTL_T(KC_TAB):
             if (os_mode == MAC && !record->tap.count) {
