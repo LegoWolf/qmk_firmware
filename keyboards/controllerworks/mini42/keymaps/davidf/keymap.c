@@ -40,20 +40,18 @@ typedef enum {
 #else
     KC_OSMODE = SAFE_RANGE,
 #endif
-    KC_VERTICAL_BAR,        // QK_USER_1
-    KC_ANIMATE,             // QK_USER_2
-    KC_A_CIRCUMFLEX,        // QK_USER_3
-    KC_E_CIRCUMFLEX,        // QK_USER_4
-    KC_E_DIAERESIS,         // QK_USER_5
-    KC_I_CIRCUMFLEX,        // QK_USER_6
-    KC_I_DIAERESIS,         // QK_USER_7
-    KC_O_CIRCUMFLEX,        // QK_USER_8
-    KC_U_CIRCUMFLEX,        // QK_USER_9
-    KC_U_DIAERESIS,         // QK_USER_10
-    KC_Y_DIAERESIS          // QK_USER_11
+    KC_ANIMATE,             // QK_USER_1
+    KC_A_CIRCUMFLEX,        // QK_USER_2
+    KC_E_CIRCUMFLEX,        // QK_USER_3
+    KC_E_DIAERESIS,         // QK_USER_4
+    KC_I_CIRCUMFLEX,        // QK_USER_5
+    KC_I_DIAERESIS,         // QK_USER_6
+    KC_O_CIRCUMFLEX,        // QK_USER_7
+    KC_U_CIRCUMFLEX,        // QK_USER_8
+    KC_U_DIAERESIS,         // QK_USER_9
+    KC_Y_DIAERESIS          // QK_USER_10
 } custom_keycodes_t;
 
-#define KC_VBAR KC_VERTICAL_BAR 
 #define KC_ANIM KC_ANIMATE
 #define KC_ACIR KC_A_CIRCUMFLEX
 #define KC_ECIR KC_E_CIRCUMFLEX
@@ -70,14 +68,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [LAYER_BASE] = LAYOUT_split_3x6_3(
       KC_ESC,          KC_Q,        KC_W,          KC_E,           KC_R,          KC_T,                KC_Y,             KC_U,          KC_I,          KC_O,          KC_P,          KC_MINS,
       MO(LAYER_SUPER), KC_A,        KC_S,          KC_D,           KC_F,          KC_G,                KC_H,             KC_J,          KC_K,          KC_L,          KC_SCLN,       MO(LAYER_SUPER),
-      OSM(MOD_LSFT),   KC_Z,        KC_X,          KC_C,           KC_V,          KC_B,                KC_N,             KC_M,          KC_COMMA,      KC_DOT,        CA_EACU,       OSM(MOD_RSFT),
+      OSM(MOD_LSFT),   KC_Z,        KC_X,          KC_C,           KC_V,          KC_B,                KC_N,             KC_M,          KC_COMM,       KC_DOT,        CA_EACU,       OSM(MOD_RSFT),
                                                    TL_LOWR,        KC_BSPC,       LCTL_T(KC_TAB),      KC_ENTER,         KC_SPACE,      TL_UPPR
   ),
 
   [LAYER_NAV] = LAYOUT_split_3x6_3(
       XXXXXXX,         XXXXXXX,     XXXXXXX,       XXXXXXX,        XXXXXXX,       XXXXXXX,             KC_PGUP,          KC_HOME,       KC_UP,         KC_END,        XXXXXXX,       XXXXXXX,
       XXXXXXX,         KC_MPRV,     KC_MNXT,       KC_VOLD,        KC_VOLU,       KC_MPLY,             KC_PGDN,          KC_LEFT,       KC_DOWN,       KC_RIGHT,      XXXXXXX,       XXXXXXX,
-      _______,         XXXXXXX,     KC_LGUI,       KC_LCTL,        KC_LALT,       KC_MUTE,             XXXXXXX,          XXXXXXX,       XXXXXXX,       XXXXXXX,       XXXXXXX ,      _______,
+      _______,         XXXXXXX,     KC_LGUI,       KC_LCTL,        KC_LALT,       KC_MUTE,             XXXXXXX,          XXXXXXX,       KC_WH_U,       KC_WH_D,       XXXXXXX ,      _______,
                                                    _______,        _______,       _______,             _______,          _______,       _______
   ),
 
@@ -96,17 +94,17 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   [LAYER_SUPER] = LAYOUT_split_3x6_3(
-      XXXXXXX,         XXXXXXX,     CA_DIAE,       CA_EGRV,        CA_GRV,        KC_INS,              KC_DEL,           CA_UGRV,       CA_SLSH,       CA_CIRC,       KC_VBAR,       KC_EQL,
-      XXXXXXX,         CA_AGRV,     CA_DTIL,       CA_LABK,        CA_RABK,       CA_BSLS,             CA_SLSH,          CA_LCBR,       CA_RCBR,       CA_LBRC,       CA_RBRC,       CA_PLUS,
+      XXXXXXX,         XXXXXXX,     XXXXXXX,       CA_EGRV,        CA_DTIL,       KC_INS,              KC_DEL,           CA_UGRV,       CA_GRV,        CA_CIRC,       CA_DIAE,       KC_EQL,
+      XXXXXXX,         CA_AGRV,     CA_PIPE,       CA_LABK,        CA_RABK,       CA_BSLS,             CA_SLSH,          CA_LCBR,       CA_RCBR,       CA_LBRC,       CA_RBRC,       CA_PLUS,
       KC_CAPS,         CA_LDAQ,     CA_RDAQ,       CA_CCED,        XXXXXXX,       XXXXXXX,             KC_APP,           OSM(MOD_LGUI), OSM(MOD_LCTL), OSM(MOD_LALT), OSM(MOD_RALT), KC_CAPS,
-                                                   TG(LAYER_GAME), _______,       _______,             _______,          _______,       KC_OSMODE                                                  
+                                                   TG(LAYER_GAME), _______,       _______,             _______,          _______,       KC_OSMODE
   ),
 
   [LAYER_GAME] = LAYOUT_split_3x6_3(
       KC_ESC,          KC_T,        KC_Q,          KC_W,           KC_E,          KC_R,                KC_PSLS,          KC_P7,         KC_P8,         KC_P9,         KC_PPLS,       TG(LAYER_GAME),
       KC_TAB,          KC_G,        KC_A,          KC_S,           KC_D,          KC_F,                KC_P0,            KC_P4,         KC_P5,         KC_P6,         KC_PMNS,       KC_ANIM,
       KC_LSFT,         KC_B,        KC_Z,          KC_X,           KC_C,          KC_V,                KC_PAST,          KC_P1,         KC_P2,         KC_P3,         KC_PCMM,       KC_RSFT,
-                                                   KC_LCTL,        KC_ENT,        KC_SPC,              KC_PENT,          KC_PEQL,       KC_PDOT                                                 
+                                                   KC_LCTL,        KC_ENT,        KC_SPC,              KC_PENT,          KC_PEQL,       KC_PDOT
   )
 };
 
@@ -897,13 +895,13 @@ void render_bootmagic_status(bool status) {
 }
 
 oled_rotation_t oled_init_user(oled_rotation_t rotation) {
-  if (!is_keyboard_master()) {
-    return OLED_ROTATION_0;
-  }
+    if (!is_keyboard_master()) {
+        return OLED_ROTATION_0;
+    }
 #ifdef SHOW_GRAPHICS
-  return OLED_ROTATION_90;
+    return OLED_ROTATION_90;
 #else
-  return OLED_ROTATION_180; // flips the display 180 degrees if offhand
+    return OLED_ROTATION_180; // flips the display 180 degrees if offhand
 #endif
 }
 
@@ -1017,17 +1015,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 #endif
             return false;
 
-        case KC_VERTICAL_BAR:
-              if (os_mode == MAC) {
-                  // On the Mac CSA keyboard layout, vertical bar is just RALT+MINUS.
-                  emit_key_event(RALT(KC_MINUS), record);
-              } else if (record->event.pressed) {
-                  // On the Windows CSA keyboard layout, vertical bar is unavailable.
-                  // So we swap to the US layout, type the vertical bar and swap back.
-                  SEND_STRING(SS_LGUI(" ") SS_DELAY(100) "|" SS_LGUI(" "));
-              }
-            return false;
-
         // Single-stroke versions of keys that normally require deadkey composition.
         case KC_A_CIRCUMFLEX: return send_deadkey_event(CA_CIRC, KC_A, record);
         case KC_E_CIRCUMFLEX: return send_deadkey_event(CA_CIRC, KC_E, record);
@@ -1044,11 +1031,15 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case S(KC_NONUS_BACKSLASH): return swap_key_event(S(CA_SLSH), record);
         case CA_SLSH: return swap_key_event(KC_NONUS_BACKSLASH, record);
         case S(CA_SLSH): return swap_key_event(S(KC_NONUS_BACKSLASH), record);
+        case CA_PIPE: return swap_key_event(RALT(KC_MINUS), record);
 
-        // Suppress keys that confuse the current OS.
-        case KC_SCROLL_LOCK: return (os_mode != MAC);
-        case KC_MISSION_CONTROL: return (os_mode == MAC);
-        case KC_LAUNCHPAD: return (os_mode == MAC);
+        // Suppress keys that confuse the selected OS.
+        case KC_PAUSE:
+        case KC_SCROLL_LOCK:
+            return (os_mode != MAC);
+        case KC_MISSION_CONTROL:
+        case KC_LAUNCHPAD:
+            return (os_mode == MAC);
 
         case LCTL_T(KC_TAB):
             if (os_mode == MAC && !record->tap.count) {
