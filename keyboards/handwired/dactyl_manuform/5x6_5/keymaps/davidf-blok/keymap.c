@@ -23,6 +23,7 @@ typedef enum {
     LAYER_SUPER,
     LAYER_FUNC,
     LAYER_NAV,
+    LAYER_NUM,
     LAYER_GAME
 } custom_layers_t;
 
@@ -56,7 +57,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         MO(LAYER_SUPER), KC_Q,        KC_W,            KC_E,            KC_R,            KC_T,                KC_Y,             KC_U,              KC_I,              KC_O,            KC_P,             MO(LAYER_SUPER),
         KC_EQL,          KC_A,        KC_S,            KC_D,            KC_F,            KC_G,                KC_H,             KC_J,              KC_K,              KC_L,            KC_SCLN,          CA_EGRV,
         KC_LSFT,         KC_Z,        KC_X,            KC_C,            KC_V,            KC_B,                KC_N,             KC_M,              KC_COMM,           KC_DOT,          CA_EACU,          KC_RSFT,
-                         CA_UGRV,     CA_AGRV,   LT(LAYER_NAV,KC_BSPC), LCTL_T(KC_TAB),  KC_LALT,             KC_RALT,          KC_ENT,            KC_SPC,            CA_CIRC,         CA_CCED,
+                         CA_UGRV,     CA_AGRV,   LT(LAYER_NAV,KC_BSPC), LCTL_T(KC_TAB),  KC_LALT,             KC_RALT,          KC_ENT,         LT(LAYER_NUM,KC_SPC), CA_CIRC,         CA_CCED,
                                                                         KC_LGUI,         KC_LCTL,             KC_RCTL,          MO(LAYER_FUNC)                                           
     ),
 
@@ -65,12 +66,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         XXXXXXX,         XXXXXXX,     XXXXXXX,         CA_EGRV,         CA_DTIL,         KC_INS,              KC_DEL,           CA_UGRV,           CA_GRV,            CA_CIRC,         CA_DIAE,          XXXXXXX,
         XXXXXXX,         CA_AGRV,     CA_PIPE,         CA_LABK,         CA_RABK,         CA_BSLS,             CA_SLSH,          CA_LCBR,           CA_RCBR,           CA_LBRC,         CA_RBRC,          S(KC_EQL),
         KC_CAPS,         CA_LDAQ,     CA_RDAQ,         CA_CCED,         XXXXXXX,         XXXXXXX,             KC_APP,           XXXXXXX,           XXXXXXX,           XXXXXXX,         XXXXXXX,          KC_CAPS,
-                         XXXXXXX,     XXXXXXX,         TG(LAYER_GAME),  XXXXXXX,         _______,             _______,          KC_OSMODE,         _______,           XXXXXXX,         XXXXXXX,
+                         XXXXXXX,     XXXXXXX,         _______,         _______,         _______,             _______,          _______,           _______,           XXXXXXX,         XXXXXXX,
                                                                         _______,         _______,             _______,          _______
     ),
 
     [LAYER_FUNC] = LAYOUT_5x6_5(
-        XXXXXXX,         XXXXXXX,     XXXXXXX,         XXXXXXX,         XXXXXXX,         XXXXXXX,             XXXXXXX,          KC_BRID,           KC_BRIU,           KC_MCTL,         KC_LPAD,          XXXXXXX,
+        KC_OSMODE,       XXXXXXX,     XXXXXXX,         XXXXXXX,         XXXXXXX,         XXXXXXX,             XXXXXXX,          KC_BRID,           KC_BRIU,           KC_MCTL,         KC_LPAD,          TG(LAYER_GAME),
         XXXXXXX,         KC_F11,      KC_F12,          KC_F13,          KC_F14,          KC_F15,              KC_F16,           KC_F17,            KC_F18,            KC_F19,          KC_F20,           XXXXXXX,
         XXXXXXX,         KC_F1,       KC_F2,           KC_F3,           KC_F4,           KC_F5,               KC_F6,            KC_F7,             KC_F8,             KC_F9,           KC_F10,           XXXXXXX,
         KC_LSFT,         KC_PAUS,     KC_PSCR,         KC_NUM,          KC_SCRL,         XXXXXXX,             XXXXXXX,          XXXXXXX,           XXXXXXX,           XXXXXXX,         XXXXXXX,          KC_RSFT,
@@ -84,6 +85,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         XXXXXXX,         KC_MPRV,     KC_MNXT,         KC_VOLD,         KC_VOLU,         KC_MPLY,             KC_PGDN,          KC_LEFT,           KC_DOWN,           KC_RGHT,         XXXXXXX,          XXXXXXX,
         _______,         XXXXXXX,     KC_LGUI,         KC_LCTL,         KC_LALT,         KC_MUTE,             XXXXXXX,          XXXXXXX,           XXXXXXX,           XXXXXXX,         XXXXXXX,          _______,
                          XXXXXXX,     XXXXXXX,         XXXXXXX,         XXXXXXX,         _______,             _______,          XXXXXXX,           XXXXXXX,           KC_WH_U,         KC_WH_D,
+                                                                        _______,         _______,             _______,          _______
+    ),
+
+    [LAYER_NUM] = LAYOUT_5x6_5(
+        XXXXXXX,         XXXXXXX,     XXXXXXX,         XXXXXXX,         XXXXXXX,         XXXXXXX,             XXXXXXX,          XXXXXXX,           XXXXXXX,           XXXXXXX,         XXXXXXX,          XXXXXXX,
+        XXXXXXX,         S(KC_1),     S(KC_2),         S(KC_3),         S(KC_4),         S(KC_5),             S(KC_6),          S(KC_7),           S(KC_8),           S(KC_9),         S(KC_0),          XXXXXXX,
+        XXXXXXX,         KC_1,        KC_2,            KC_3,            KC_4,            KC_5,                KC_6,             KC_7,              KC_8,              KC_9,            KC_0,             XXXXXXX,
+        _______,         XXXXXXX,     XXXXXXX,         XXXXXXX,         XXXXXXX,         XXXXXXX,             XXXXXXX,          XXXXXXX,           XXXXXXX,           XXXXXXX,         XXXXXXX,          _______,
+                         XXXXXXX,     XXXXXXX,         XXXXXXX,         XXXXXXX,         _______,             _______,          XXXXXXX,           XXXXXXX,           XXXXXXX,         XXXXXXX,
                                                                         _______,         _______,             _______,          _______
     ),
 
